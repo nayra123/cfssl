@@ -58,6 +58,23 @@ func TestCommandHelp(t *testing.T) {
 	}
 }
 
+func TestMultipleValueParsing(t *testing.T) {
+	called := false
+	var c Config
+	ResetCFSSLFlagSetForParseTesting(func() { called = true }, &c)
+	args := []string{"-crl", "http://crlurl1.com/crl.der", "-crl", "http://crlurl2.com/crl.der"}
+	cfsslFlagSet.Parse(args)
+	if called {
+		t.Fatal("crl flags not parsed")
+	}
+	if len(c.CRL) != 2 {
+		t.Fatal("invalid number of crl parameters")
+	}
+	if c.CRL[0] != "http://crlurl1.com/crl.der" || c.CRL[1] != "http://crlurl2.com/crl.der" {
+		t.Fatal("invalid crl param")
+	}
+}
+
 func TestCommandBadFlag(t *testing.T) {
 	called := false
 	ResetCFSSLFlagSetForTesting(func() { called = true })
@@ -84,6 +101,14 @@ func ResetCFSSLFlagSetForTesting(usage func()) {
 	var c Config
 	cfsslFlagSet = flag.NewFlagSet("cfssl", flag.ContinueOnError)
 	registerFlags(&c, cfsslFlagSet)
+	cfsslFlagSet.Usage = usage
+}
+
+// ResetCFSSLFlagSetForParseTesting reset cfsslFlagSet with flag.ContinueOnError so parse
+// errors in flag will not exit the program and takes Config pointer as parameter to check parsed config
+func ResetCFSSLFlagSetForParseTesting(usage func(), c *Config) {
+	cfsslFlagSet = flag.NewFlagSet("cfssl", flag.ContinueOnError)
+	registerFlags(c, cfsslFlagSet)
 	cfsslFlagSet.Usage = usage
 }
 

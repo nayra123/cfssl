@@ -234,8 +234,8 @@ func (s *Signer) Sign(req signer.SignRequest) (cert []byte, err error) {
 		}
 	}
 
-	if req.CRLOverride != "" {
-		safeTemplate.CRLDistributionPoints = []string{req.CRLOverride}
+	if len(req.CRLOverride) != 0 {
+		safeTemplate.CRLDistributionPoints = req.CRLOverride
 	}
 
 	if safeTemplate.IsCA {

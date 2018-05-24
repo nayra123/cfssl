@@ -136,8 +136,8 @@ func gencertMain(args []string, c cli.Config) error {
 			Label:   c.Label,
 		}
 
-		if c.CRL != "" {
-			signReq.CRLOverride = c.CRL
+		if len(c.CRL) != 0 {
+			signReq.CRLOverride = []string(c.CRL)
 		}
 		cert, err = s.Sign(signReq)
 		if err != nil {

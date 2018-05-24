@@ -2,6 +2,7 @@ package cli
 
 import (
 	"flag"
+	"strings"
 	"time"
 
 	"github.com/cloudflare/cfssl/config"
@@ -9,6 +10,17 @@ import (
 	"github.com/cloudflare/cfssl/log"
 	"github.com/cloudflare/cfssl/signer/universal"
 )
+
+type arrayFlags []string
+
+func (i *arrayFlags) String() string {
+	return strings.Join(*i, ",")
+}
+
+func (i *arrayFlags) Set(value string) error {
+	*i = append(*i, value)
+	return nil
+}
 
 // Config is a type to hold flag values used by cfssl commands.
 type Config struct {
@@ -59,7 +71,7 @@ type Config struct {
 	MaxHosts          int
 	Responses         string
 	Path              string
-	CRL               string
+	CRL               arrayFlags
 	Usage             string
 	PGPPrivate        string
 	PGPName           string
@@ -68,7 +80,7 @@ type Config struct {
 	AKI               string
 	DBConfigFile      string
 	CRLExpiration     time.Duration
-	Disable     	  string
+	Disable           string
 }
 
 // registerFlags defines all cfssl command flags and associates their values with variables.
@@ -118,7 +130,7 @@ func registerFlags(c *Config, f *flag.FlagSet) {
 	f.IntVar(&c.MaxHosts, "max-hosts", 100, "maximum number of hosts to scan")
 	f.StringVar(&c.Responses, "responses", "", "file to load OCSP responses from")
 	f.StringVar(&c.Path, "path", "/", "Path on which the server will listen")
-	f.StringVar(&c.CRL, "crl", "", "CRL URL Override")
+	f.Var(&c.CRL, "crl", "CRL URL Override")
 	f.StringVar(&c.Password, "password", "0", "Password for accessing PKCS #12 data passed to bundler")
 	f.StringVar(&c.Usage, "usage", "", "usage of private key")
 	f.StringVar(&c.PGPPrivate, "pgp-private", "", "file to load a PGP Private key decryption")

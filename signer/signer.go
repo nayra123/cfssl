@@ -51,7 +51,7 @@ type SignRequest struct {
 	Request     string      `json:"certificate_request"`
 	Subject     *Subject    `json:"subject,omitempty"`
 	Profile     string      `json:"profile"`
-	CRLOverride string      `json:"crl_override"`
+	CRLOverride []string    `json:"crl_override"`
 	Label       string      `json:"label"`
 	Serial      *big.Int    `json:"serial,omitempty"`
 	Extensions  []Extension `json:"extensions,omitempty"`
@@ -324,10 +324,10 @@ func FillTemplate(template *x509.Certificate, defaultProfile, profile *config.Si
 	template.SubjectKeyId = ski
 
 	if ocspURL != "" {
-		template.OCSPServer = []string{ocspURL}
+		template.OCSPServer = strings.Split(ocspURL, ",")
 	}
 	if crlURL != "" {
-		template.CRLDistributionPoints = []string{crlURL}
+		template.CRLDistributionPoints = strings.Split(crlURL, ",")
 	}
 
 	if len(issuerURL) != 0 {
